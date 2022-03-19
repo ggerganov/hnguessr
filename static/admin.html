@@ -1,0 +1,107 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+        <title>HNGuessr - Controls</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=0.7, maximum-scale=0.7" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <script src="incppect.js"></script>
+        <script src="imgui-ws.js"></script>
+
+        <style>
+            body {
+                overflow-y: hidden;
+                overflow-x: hidden;
+                margin: 0;
+                /*background-image: url('images/background-0.png');*/
+                background-repeat:no-repeat;
+                background-position: center center;
+                background-color: #FFFFFF;
+                background-attachment: fixed;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: contain;
+                -webkit-font-smoothing: subpixel-antialiased;
+                font-smoothing: subpixel-antialiased;
+            }
+
+            .emscripten {
+                padding: 0;
+                margin: 0;
+                display: block;
+                width: 820px;
+                height: 420px;
+                background-color: #000;
+            }
+
+            canvas.emscripten {
+                border: 0px none;
+                background-color: #000;
+            }
+
+            #main-container {
+                font-size:12px;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            }
+        </style>
+    </head>
+
+    <body style="font-family: Georgia, serif;">
+        <script>
+            function init() {
+                var output = document.getElementById('client-info');
+
+                incppect.render = function() {
+                    imgui_ws.gl.clearColor(0.45, 0.55, 0.60, 1.00);
+                    imgui_ws.gl.clear(imgui_ws.gl.COLOR_BUFFER_BIT);
+
+                    imgui_ws.incppect_textures(this);
+                    imgui_ws.incppect_draw_lists(this);
+                    imgui_ws.render();
+
+                    var my_id = this.get_int32('my_id[%d]', -1) || 0;
+                    output.innerHTML = 'Your client Id: ' + my_id;
+                }
+
+                incppect.onerror = function(evt) {
+                    if (typeof evt === 'object') {
+                        output.innerHTML = 'Error: check console for more information';
+                        console.error(evt);
+                    } else {
+                        output.innerHTML = evt;
+                    }
+                }
+
+                incppect.k_requests_update_freq_ms = document.getElementById('update_freq_ms').value;
+                incppect.init();
+
+                {
+                    var canvas = document.getElementById('canvas_main');
+                    var ctx = canvas.getContext("webgl");
+
+                    var width = canvas.getBoundingClientRect().width || canvas.width;
+                    var height = canvas.getBoundingClientRect().height || canvas.height;
+
+                    canvas.setAttribute('width', width);
+                    canvas.setAttribute('height', height);
+                }
+
+                imgui_ws.set_incppect_handlers(incppect);
+                imgui_ws.init('canvas_main');
+            }
+
+            window.addEventListener('load', init);
+
+        </script>
+
+        <div id=main-container align=left width=100% style='padding: 0px; margin: 0px;'>
+            <div id="client-info" style="display: none;"></div>
+            <input type="range" min="16" max="200" value="16" class="slider" id="update_freq_ms" style="display: none;"
+                                    onChange="incppect.k_requests_update_freq_ms = this.value; update_freq_ms_out.value = this.value;">
+            <output id="update_freq_ms_out" style="display: none;">16</output>
+
+            <canvas id="canvas_main" class="emscripten">Your browser does not support the HTML5 canvas tag.</canvas>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,3 @@
+[submodule "third-party/imgui-ws"]
+	path = third-party/imgui-ws
+	url = https://github.com/ggerganov/imgui-ws
