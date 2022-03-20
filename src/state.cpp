@@ -167,9 +167,10 @@ bool State::generateIndex(const char * filename, int nStories) {
         <link rel="stylesheet" type="text/css" href="/news.css">
         <link rel="shortcut icon" href="/favicon.ico">
 
-        <meta http-equiv="cache-control" content="no-cache">
-        <meta http-equiv="pragma" content="no-cache">
-        <meta http-equiv="expires" content="0">
+        <!-- Disable cache -->
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
 
         <!-- FB Meta Tags -->
         <meta property="og:url" content=")" << kURL << R"(">
