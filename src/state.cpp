@@ -566,9 +566,16 @@ bool State::generateIndex(const char * filename, int nStories) {
 
             function updateLocalStorage() {
                 var elements = document.getElementsByClassName("input");
-                var inputs = [];
-                for (var i = 0; i < elements.length; i++) {
-                    inputs.push(elements[i].innerText);
+                var inputs = JSON.parse(localStorage.getItem(curDay));
+                if (elements.length > inputs.length) {
+                    inputs = [];
+                    for (var i = 0; i < elements.length; ++i) {
+                        inputs.push(elements[i].innerText);
+                    }
+                } else {
+                    for (var i = 0; i < elements.length; ++i) {
+                        inputs[i] = elements[i].innerText;
+                    }
                 }
                 localStorage.setItem(curDay, JSON.stringify(inputs));
             }
