@@ -15,6 +15,6 @@ for everyone to play.
 
 If you want to play past rounds, you can use the following URL:
 
-https://hnguessr.ggerganov.com/0/top20
+https://hnguessr.ggerganov.com/1/
 
-Replace the "0" with the round that you would like to replay.
+Replace the "1" with the round that you would like to replay.
