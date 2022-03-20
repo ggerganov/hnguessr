@@ -2,3 +2,4 @@ data/*
 build/
 .cache
 static/top*
+static/index*

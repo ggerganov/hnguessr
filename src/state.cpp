@@ -203,7 +203,7 @@ bool State::generateIndex(const char * filename, int nStories) {
 
         <title>)" << kTitle << R"(</title>
     </head>
-    <body>
+    <body style="display: none">
         <center>
             <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
                 <tr>
@@ -218,9 +218,10 @@ bool State::generateIndex(const char * filename, int nStories) {
                                 <td style="line-height:12pt; height:10px;">
                                     <span class="pagetop">
                                         <b class="hnname"><a href="/" tabindex="-1">)" << kTitle << R"(</a></b>
-                                        <a href="/top5" tabindex="-1">5</a> |
-                                        <a href="/top10" tabindex="-1">10</a> |
-                                        <a href="/top20" tabindex="-1">20</a> |
+                                        <a href="/?n=5"  tabindex="-1">5</a> |
+                                        <a href="/?n=10" tabindex="-1">10</a> |
+                                        <a href="/?n=20" tabindex="-1">20</a> |
+                                        <a href="/?n=30" tabindex="-1">30</a> |
                                         <a href="#" tabindex="-1" onClick="showHelp();">help</a>
                                     </span>
                                 </td>
@@ -239,7 +240,7 @@ bool State::generateIndex(const char * filename, int nStories) {
                 <tr id="pagespace" title="" style="height:10px"></tr>
                 <tr>
                     <td>
-                        <table border="0" cellpadding="0" cellspacing="0" class="itemlist">
+                        <table id="container-main" border="0" cellpadding="0" cellspacing="0" class="itemlist">
 )";
 
     int gtid = 0;
@@ -248,7 +249,7 @@ bool State::generateIndex(const char * filename, int nStories) {
     for (int i = 0; i < nStories; ++i) {
         const auto & story = stories[i];
         fout << R"(
-                            <tr class='athing' id=')" << story.id << R"('>
+                            <tr class='athing' id='container-story-)" << i << R"('>
                                                                         <td align="right" valign="top" class="title">
                                                                         <span class="rank">)" << (i + 1) << R"(.</span>
                                                                                                                </td>
@@ -296,17 +297,17 @@ bool State::generateIndex(const char * filename, int nStories) {
         fout << R"(
                                 </td>
                             </tr>
-                            <tr>
+                            <tr id='container-info-)" << i << R"('>
                                 <td colspan="2"></td>
                                 <td class="subtext">
                                     <span class="score" id="score-)" << story.id << R"(">)" << story.score << R"( points</span> by <span class="hnuser">)" << story.by << R"(</span>
                                     <span class="age" title=")" << strTime << R"( UTC">)" << strTime << R"(</span>
                                     <span id="unv_)" << story.id << R"("></span> |
                                     <a id="comments-)" << i << R"(" href="https://news.ycombinator.com/item?id=)" << story.id << R"(" class="inactivelink" tabindex="-1">)" << story.descendants << R"(&nbsp;comments</a>
-                                                                  </td>
-                                                                  </tr>
-                                                                  <tr class="spacer" style="height:5px"></tr>
-                                                                 )";
+                                </td>
+                            </tr>
+                            <tr id='container-spacer-)" << i << R"(' class="spacer" style="height:5px"></tr>
+)";
     }
 
     fout << R"(
@@ -345,6 +346,8 @@ bool State::generateIndex(const char * filename, int nStories) {
         </center>
 
         <script>
+            var nPlay = findGetParameter("n") || localStorage.getItem("n") || 10;
+
             var nStories = )" << nStories << R"(;
             var curDay = )" << curDay << R"(;
             var curIssue = )" << curIssue << R"(;
@@ -380,6 +383,19 @@ bool State::generateIndex(const char * filename, int nStories) {
 
     fout << R"(
             ];
+
+            function findGetParameter(parameterName) {
+                var tmp = [];
+                var result = null;
+                var items = location.search.substr(1).split("&");
+
+                for (var index = 0; index < items.length; index++) {
+                    tmp = items[index].split("=");
+                    if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+                }
+
+                return result;
+            }
 
             function copyToClipboard(elementId) {
                 var text = document.getElementById(elementId).innerHTML;
@@ -568,7 +584,10 @@ bool State::generateIndex(const char * filename, int nStories) {
 
             function updateLocalStorage() {
                 var elements = document.getElementsByClassName("input");
-                var inputs = JSON.parse(localStorage.getItem(curDay));
+                var inputs = [];
+                if (localStorage.getItem(curDay) != null) {
+                    inputs = JSON.parse(localStorage.getItem(curDay));
+                }
                 if (elements.length > inputs.length) {
                     inputs = [];
                     for (var i = 0; i < elements.length; ++i) {
@@ -583,6 +602,39 @@ bool State::generateIndex(const char * filename, int nStories) {
             }
 
             function init() {
+                localStorage.setItem("n", nPlay);
+
+                // delete all elements with id "container-story-k" for k >= nPlay
+                for (var i = nPlay; i < nStories; ++i) {
+                    var elStory = document.getElementById("container-story-" + i);
+                    if (elStory != null) {
+                        elStory.parentNode.removeChild(elStory);
+                    }
+                    var elInfo = document.getElementById("container-info-" + i);
+                    if (elInfo != null) {
+                        elInfo.parentNode.removeChild(elInfo);
+                    }
+                    var elSpacer = document.getElementById("container-spacer-" + i);
+                    if (elSpacer != null) {
+                        elSpacer.parentNode.removeChild(elSpacer);
+                    }
+                }
+                nStories = nPlay;
+
+                // remove answers for which tokenToStory is >= nPlay
+                for (var i = 0; i < tokenToStoryMap.length; ++i) {
+                    if (tokenToStoryMap[i] >= nPlay) {
+                        answers.splice(i, 1);
+                        inputState.splice(i, 1);
+                        tokenToStoryMap.splice(i, 1);
+                        --i;
+                    }
+                }
+
+                // enable display
+                var elBody = document.getElementsByTagName("body")[0];
+                elBody.style.display = "block";
+
                 if (localStorage.getItem(curDay) != null) {
                     inputs = JSON.parse(localStorage.getItem(curDay));
                     for (var i = 0; i < inputs.length; ++i) {
@@ -592,6 +644,7 @@ bool State::generateIndex(const char * filename, int nStories) {
                         }
                     }
                 }
+                updateLocalStorage();
 
                 var inputs = document.getElementsByClassName("input");
                 for (var i = 0; i < inputs.length; i++) {
@@ -645,9 +698,7 @@ bool State::generateIndex(const char * filename, int nStories) {
 bool State::generateHTML() {
     bool result = true;
 
-    result &= generateIndex("top5", 5);
-    result &= generateIndex("top10", 10);
-    result &= generateIndex("top20", 20);
+    result &= generateIndex("index.html", 30);
 
     return result;
 }

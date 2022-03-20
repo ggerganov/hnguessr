@@ -9,19 +9,15 @@ if [ -f stories.txt ] ; then
 
     echo "Updating web pages for day $day, issue $issue"
 
-    cp -v top5  /var/www/html/hnguessr/
-    cp -v top10 /var/www/html/hnguessr/
-    cp -v top20 /var/www/html/hnguessr/
+    cp -v index.html /var/www/html/hnguessr/
 
     mkdir /var/www/html/hnguessr/$issue
-    cp -v top5  /var/www/html/hnguessr/$issue/
-    cp -v top10 /var/www/html/hnguessr/$issue/
-    cp -v top20 /var/www/html/hnguessr/$issue/
+    cp -v index.html /var/www/html/hnguessr/$issue/
 fi
 
 echo "Fetching HN API ..."
 
-../get-top.sh 20 > stories.txt
+../get-top.sh 30 > stories.txt
 
 day=$(head -n 2 stories.txt | tail -n 1)
 cp stories.txt stories-${day}.txt
