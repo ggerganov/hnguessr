@@ -13,18 +13,19 @@ int main(int argc, char ** argv) {
 
     const std::string fnameStories = argv[1];
 
-    State state;
-    state.reload(fnameStories.c_str());
-
-    auto & stories = state.stories;
-    printf("Loaded %lu stories\n", stories.size());
-
     int port = 5015;
     const std::string httpRoot = "../static/";
 
     if (argc > 2) {
         port = std::stoi(argv[2]);
     }
+
+    State state;
+    state.reload(fnameStories.c_str());
+    state.generateHTML();
+
+    auto & stories = state.stories;
+    printf("Loaded %lu stories\n", stories.size());
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -76,6 +77,7 @@ int main(int argc, char ** argv) {
     Utils::VSync vsync;
     StateUI stateUI;
 
+    auto tStart = std::chrono::high_resolution_clock::now();
     while (true) {
         // websocket event handling
         auto events = imguiWS.takeEvents();
@@ -86,6 +88,13 @@ int main(int argc, char ** argv) {
 
         io.DisplaySize = ImVec2(1200, 800);
         io.DeltaTime = vsync.delta_s();
+
+        bool doReload = false;
+        auto tNow = std::chrono::high_resolution_clock::now();
+        if (tNow - tStart > std::chrono::seconds(24*3600)) {
+            tStart = tNow;
+            doReload = true;
+        }
 
         ImGui::NewFrame();
 
@@ -154,8 +163,10 @@ int main(int argc, char ** argv) {
 
         ImGui::EndChild();
 
-        if (ImGui::Button("Reload", { 100, 40 })) {
+        if (ImGui::Button("Reload", { 100, 40 }) || doReload) {
             state.reload(fnameStories.c_str());
+            state.generateHTML();
+            doReload = false;
         }
 
         ImGui::SameLine();
@@ -189,9 +200,11 @@ int main(int argc, char ** argv) {
         imguiWS.setDrawData(ImGui::GetDrawData());
 
         // if not clients are connected, just sleep to save CPU
-        do {
+        if (imguiWS.nConnected() == 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        } else {
             vsync.wait();
-        } while (imguiWS.nConnected() == 0);
+        }
     }
 
     ImGui::DestroyContext();

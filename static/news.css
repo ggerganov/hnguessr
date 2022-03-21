@@ -15,12 +15,12 @@ textarea { font-family:monospace; font-size:10pt; resize:both; }
 .input {
   font-family: inherit;
   font-size: inherit;
-  padding: 0px 6px;
-  margin-right: 4px;
+  padding: 0px 12px;
+  margin-right: 0px;
   margin-left: 0px;
   margin-top: 0px;
   margin-bot: 0px;
-  min-width: 12px;
+  min-width: 24px;
   background-color: #ffc466;
   border: 2px solid #0000;
   text-align: center;
@@ -28,9 +28,8 @@ textarea { font-family:monospace; font-size:10pt; resize:both; }
   transition: 0.5s;
 }
 
-#result {
-  color:#000000;
-}
+#result { color:#000000; }
+#container-main { margin-right: 20px; }
 
 .inactiveLink {
   pointer-events: none;

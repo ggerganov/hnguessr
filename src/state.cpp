@@ -106,7 +106,6 @@ bool State::reload(const char * fname) {
 
     loadConfig();
     saveConfig();
-    generateHTML();
 
     return true;
 }
@@ -227,8 +226,8 @@ bool State::generateIndex(const char * filename, int nStories) {
                                 </td>
                                 <td style="text-align:right;padding-right:4px;">
                                     <span class="pagetop">
-                                        )" << curIssue << R"( |
-                                        <span title=")" << Utils::timestampFormat(timestamp_s, "%Y-%m-%d %H:%M:%S") << " UTC" << R"(">
+                                        <span title="Issue )" << curIssue << R"(">)" << curIssue << R"(</span> |
+                                        <span title="Hacker News front page from )" << Utils::timestampFormat(timestamp_s, "%Y-%m-%d %H:%M:%S") << " UTC" << R"(">
                                             )" << Utils::timestampFormat(timestamp_s, "%Y-%m-%d") << R"(
                                         </span>
                                     </span>
@@ -265,7 +264,7 @@ bool State::generateIndex(const char * filename, int nStories) {
         for (const auto ch : story.out) {
             if (ch == kTokenSymbol) {
                 if (story.tokens[tid].toGuess) {
-                    fout << R"(<span id="input-)" << gtid << R"(" class="input" role="textbox" maxlength="10" tabindex=")" << (gtid + 1) << R"(" contenteditable="true">)" << "" << R"(</span>)";
+                    fout << R"(<span id="input-)" << gtid << R"(" class="input" role="textbox" maxlength="10" tabindex=")" << (gtid + 1) << R"(" contenteditable="true">)" << "" << R"(</span>&nbsp;)";
                     answers.push_back(story.tokens[tid].text);
                     tokenToStoryMap.push_back(i);
                     ++gtid;
@@ -326,8 +325,9 @@ bool State::generateIndex(const char * filename, int nStories) {
                         <br>
                         <center>
                             <span id="result"></span>
-                            <span id="result-share" style="display:none"></span>
-                            <input type="button" id="share" value="Share" onclick="copyToClipboard('result-share');"></input>
+                            <br><br>
+                            <input type="checkbox" id="show-emoji" onClick="updateResult();" tabindex="-1" checked>Емоджита</input>
+                            <input type="button" id="share" value="Share" onclick="copyToClipboard('result');"></input>
                         </center>
                         <br>
                         <center>
@@ -399,6 +399,8 @@ bool State::generateIndex(const char * filename, int nStories) {
 
             function copyToClipboard(elementId) {
                 var text = document.getElementById(elementId).innerHTML;
+                // replace <br> with \n
+                text = text.replace(/<br>/g, '\n');
 
                 if (window.clipboardData && window.clipboardData.setData) {
                     window.clipboardData.setData("Text", text);
@@ -484,11 +486,12 @@ bool State::generateIndex(const char * filename, int nStories) {
 
             function refreshHyperlinks() {
                 for (var i = 0; i < nStories; ++i) {
-                    var isSolved = true;
+                    var isActive = true;
                     for (var j = 0; j < inputState.length; ++j) {
                         if (tokenToStoryMap[j] == i) {
-                            if (!inputState[j]) {
-                                isSolved = false;
+                            var elInput = document.getElementById('input-' + j);
+                            if (elInput.innerText.length == 0) {
+                                isActive = false;
                                 break;
                             }
                         }
@@ -496,28 +499,28 @@ bool State::generateIndex(const char * filename, int nStories) {
 
                     var elURL = document.getElementById("url-" + i);
                     if (elURL != null) {
-                        if (isSolved) {
+                        if (isActive) {
                             document.getElementById("url-" + i).classList.remove("inactivelink");
                         } else {
-                            document.getElementById("url-" + i).classList.add("inactivelink");
+                            //document.getElementById("url-" + i).classList.add("inactivelink");
                         }
                     }
 
                     var elStory = document.getElementById("story-" + i);
                     if (elStory != null) {
-                        if (isSolved) {
+                        if (isActive) {
                             document.getElementById("story-" + i).classList.remove("inactivelink");
                         } else {
-                            document.getElementById("story-" + i).classList.add("inactivelink");
+                            //document.getElementById("story-" + i).classList.add("inactivelink");
                         }
                     }
 
                     var elComments = document.getElementById("comments-" + i);
                     if (elComments != null) {
-                        if (isSolved) {
+                        if (isActive) {
                             document.getElementById("comments-" + i).classList.remove("inactivelink");
                         } else {
-                            document.getElementById("comments-" + i).classList.add("inactivelink");
+                            //document.getElementById("comments-" + i).classList.add("inactivelink");
                         }
                     }
                 }
@@ -578,8 +581,22 @@ bool State::generateIndex(const char * filename, int nStories) {
                     }
                 }
 
-                document.getElementById('result').innerText = 'Score: ' + score + '/' + answers.length;
-                document.getElementById('result-share').innerText = 'HNGuessr ' + curIssue + ' ' + score + '/' + answers.length;
+                document.getElementById('result').innerText = ')" << kName << R"(: issue ' + curIssue + ', stories ' + nStories + ', score ' + score + '/' + answers.length;
+                if (document.getElementById('show-emoji').checked) {
+                    document.getElementById('result').innerText += '\n\n';
+                    for (var i = 0; i < inputState.length; ++i) {
+                        if (inputState[i]) {
+                            document.getElementById('result').innerText += '🟩';
+                        } else {
+                            var elInput = document.getElementById('input-' + i);
+                            if (elInput.innerText.length == 0) {
+                                document.getElementById('result').innerText += '🟨';
+                            } else {
+                                document.getElementById('result').innerText += '🟥';
+                            }
+                        }
+                    }
+                }
             }
 
             function updateLocalStorage() {
@@ -669,6 +686,18 @@ bool State::generateIndex(const char * filename, int nStories) {
                             }
                         }
                     });
+
+                    inputs[i].addEventListener("blur", function(event) {
+                        updateLocalStorage();
+
+                        var id = this.id.substring('input-'.length);
+                        var idNext = (parseInt(id) + 1) % answers.length;
+
+                        checkAll();
+                        var isCorrect = inputState[id];
+
+                        updateResult();
+                    });
                 }
 
                 updateResult();
@@ -682,8 +711,10 @@ bool State::generateIndex(const char * filename, int nStories) {
                 alert('Can you guess the missing words from yesterday\'s top HN stories?\n\n' +
                       '- Enter your answers in the boxes below\n' +
                       '- Press enter to verify your answers\n' +
-                      '- Correct answers are highlighted in green\n\n' +
-                      'Come back tomorrow for more!');
+                      '- Correct answers are highlighted in green\n' +
+                      '- Wrong answers are highlighted in red\n' +
+                      '- You are free to try as many times as you like\n\n' +
+                      'Come back tomorrow for another round!');
             }
 
             window.addEventListener('load', init);
