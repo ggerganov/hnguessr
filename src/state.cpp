@@ -676,7 +676,7 @@ bool State::generateIndex(const char * filename, int nStories) {
                         elInput.setAttribute("maxlength", answers[i].length);
                         elInput.setAttribute("placeholder", answers[i].length);
                         // change width of input field to fit answer
-                        elInput.style.width = (8*(answers[i].length + 1) + 4) + 'px';
+                        elInput.style.width = (8*(answers[i].length + 1) + 16) + 'px';
                     }
                 }
 
