@@ -163,7 +163,7 @@ bool State::generateIndex(const char * filename, int nStories) {
     <head>
         <meta charset="UTF-8">
         <meta name="referrer" content="origin">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
         <link rel="stylesheet" type="text/css" href="/news.css">
         <link rel="shortcut icon" href="/favicon.ico">
 
@@ -226,6 +226,7 @@ bool State::generateIndex(const char * filename, int nStories) {
                                 </td>
                                 <td style="text-align:right;padding-right:4px;">
                                     <span class="pagetop">
+                                        <a href="/)" << curIssue - 1 << R"(" tabindex="-1">prev</a> |
                                         <span title="Issue )" << curIssue << R"(">)" << curIssue << R"(</span> |
                                         <span title="Hacker News front page from )" << Utils::timestampFormat(timestamp_s, "%Y-%m-%d %H:%M:%S") << " UTC" << R"(">
                                             )" << Utils::timestampFormat(timestamp_s, "%Y-%m-%d") << R"(
@@ -264,7 +265,7 @@ bool State::generateIndex(const char * filename, int nStories) {
         for (const auto ch : story.out) {
             if (ch == kTokenSymbol) {
                 if (story.tokens[tid].toGuess) {
-                    fout << R"(<span id="input-)" << gtid << R"(" class="input" role="textbox" maxlength="10" tabindex=")" << (gtid + 1) << R"(" contenteditable="true">)" << "" << R"(</span>&nbsp;)";
+                    fout << R"(&nbsp;<input id="input-)" << gtid << R"(" class="input" type="text" maxlength="5" size="5" tabindex=")" << (gtid + 1) << R"(" >)" << "" << R"(</input>&nbsp;)";
                     answers.push_back(story.tokens[tid].text);
                     tokenToStoryMap.push_back(i);
                     ++gtid;
@@ -326,7 +327,13 @@ bool State::generateIndex(const char * filename, int nStories) {
                         <center>
                             <span id="result"></span>
                             <br><br>
-                            <input type="checkbox" id="show-emoji" onClick="updateResult();" tabindex="-1" checked>Емоджита</input>
+                            <input type="radio" name="show-icons" id="use-none" tabindex="-1" onClick="updateResult();">
+                            <label for="use-none">None</label>
+                            <input type="radio" name="show-icons" id="use-unicode" tabindex="-1" onClick="updateResult();" checked>
+                            <label for="use-unicode">Unicode</label>
+                            <input type="radio" name="show-icons" id="use-emoji" tabindex="-1" onClick="updateResult();">
+                            <label for="use-emoji">Emoji</label>
+                            <br><br>
                             <input type="button" id="share" value="Share" onclick="copyToClipboard('result');"></input>
                         </center>
                         <br>
@@ -434,6 +441,11 @@ bool State::generateIndex(const char * filename, int nStories) {
                         .then(() => console.log('Successful share'))
                         .catch(error => console.log('Error sharing:', error));
                 }
+
+                document.getElementById('share').value = 'Copied to clipboard!';
+                setTimeout(function() {
+                    document.getElementById('share').value = 'Share';
+                }, 2000);
             }
 
             // compute similarity score between 2 strings
@@ -490,7 +502,7 @@ bool State::generateIndex(const char * filename, int nStories) {
                     for (var j = 0; j < inputState.length; ++j) {
                         if (tokenToStoryMap[j] == i) {
                             var elInput = document.getElementById('input-' + j);
-                            if (elInput.innerText.length == 0) {
+                            if (elInput.value.length == 0) {
                                 isActive = false;
                                 break;
                             }
@@ -528,7 +540,7 @@ bool State::generateIndex(const char * filename, int nStories) {
 
             function check(id) {
                 var elInput = document.getElementById('input-' + id);
-                var input = elInput.innerText;
+                var input = elInput.value;
                 var answer = answers[id];
 
                 if (input.length == 0) {
@@ -544,7 +556,7 @@ bool State::generateIndex(const char * filename, int nStories) {
 
                 if (input.toLowerCase() == answer.toLowerCase()) {
                     elInput.style.backgroundColor = '#00ff0055';
-                    elInput.innerText = input;
+                    elInput.value = input;
                     inputState[id] = true;
                     refreshHyperlinks();
                     return true;
@@ -582,14 +594,28 @@ bool State::generateIndex(const char * filename, int nStories) {
                 }
 
                 document.getElementById('result').innerText = ')" << kName << R"(: issue ' + curIssue + ', stories ' + nStories + ', score ' + score + '/' + answers.length;
-                if (document.getElementById('show-emoji').checked) {
+                if (document.getElementById('use-unicode').checked) {
+                    document.getElementById('result').innerText += '\n\n';
+                    for (var i = 0; i < inputState.length; ++i) {
+                        if (inputState[i]) {
+                            document.getElementById('result').innerText += '▣';
+                        } else {
+                            var elInput = document.getElementById('input-' + i);
+                            if (elInput.value.length == 0) {
+                                document.getElementById('result').innerText += '▢';
+                            } else {
+                                document.getElementById('result').innerText += '▧';
+                            }
+                        }
+                    }
+                } else if (document.getElementById('use-emoji').checked) {
                     document.getElementById('result').innerText += '\n\n';
                     for (var i = 0; i < inputState.length; ++i) {
                         if (inputState[i]) {
                             document.getElementById('result').innerText += '🟩';
                         } else {
                             var elInput = document.getElementById('input-' + i);
-                            if (elInput.innerText.length == 0) {
+                            if (elInput.value.length == 0) {
                                 document.getElementById('result').innerText += '🟨';
                             } else {
                                 document.getElementById('result').innerText += '🟥';
@@ -608,11 +634,11 @@ bool State::generateIndex(const char * filename, int nStories) {
                 if (elements.length > inputs.length) {
                     inputs = [];
                     for (var i = 0; i < elements.length; ++i) {
-                        inputs.push(elements[i].innerText);
+                        inputs.push(elements[i].value);
                     }
                 } else {
                     for (var i = 0; i < elements.length; ++i) {
-                        inputs[i] = elements[i].innerText;
+                        inputs[i] = elements[i].value;
                     }
                 }
                 localStorage.setItem(curDay, JSON.stringify(inputs));
@@ -638,13 +664,19 @@ bool State::generateIndex(const char * filename, int nStories) {
                 }
                 nStories = nPlay;
 
-                // remove answers for which tokenToStory is >= nPlay
                 for (var i = 0; i < tokenToStoryMap.length; ++i) {
+                    // remove answers for which tokenToStory is >= nPlay
                     if (tokenToStoryMap[i] >= nPlay) {
                         answers.splice(i, 1);
                         inputState.splice(i, 1);
                         tokenToStoryMap.splice(i, 1);
                         --i;
+                    } else {
+                        var elInput = document.getElementById("input-" + i);
+                        elInput.setAttribute("maxlength", answers[i].length);
+                        elInput.setAttribute("placeholder", answers[i].length);
+                        // change width of input field to fit answer
+                        elInput.style.width = (8*(answers[i].length + 1) + 4) + 'px';
                     }
                 }
 
@@ -657,7 +689,7 @@ bool State::generateIndex(const char * filename, int nStories) {
                     for (var i = 0; i < inputs.length; ++i) {
                         var elInput = document.getElementById('input-' + i);
                         if (elInput != null) {
-                            elInput.innerText = inputs[i];
+                            elInput.value = inputs[i];
                         }
                     }
                 }

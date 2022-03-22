@@ -15,26 +15,26 @@ textarea { font-family:monospace; font-size:10pt; resize:both; }
 .input {
   font-family: inherit;
   font-size: inherit;
-  padding: 0px 12px;
-  margin-right: 0px;
-  margin-left: 0px;
-  margin-top: 0px;
-  margin-bot: 0px;
-  min-width: 24px;
+  padding: 0px;
+  margin: 0px;
+  min-width: 0px;
   background-color: #ffc466;
-  border: 2px solid #0000;
+  border: 1px solid #0000;
   text-align: center;
   -webkit-transition: 0.5s;
   transition: 0.5s;
 }
 
+input:focus {
+    outline: none !important;
+    border-color: #000000;
+    box-shadow: 0 0 0px #000000;
+}
+
 #result { color:#000000; }
 #container-main { margin-right: 20px; }
 
-.inactiveLink {
-  pointer-events: none;
-  cursor: default;
-}
+.inactiveLink { pointer-events: none; cursor: default; color: #828282 !important; }
 
 a:link    { color:#000000; text-decoration:none; }
 a:visited { color:#828282; text-decoration:none; }
@@ -71,10 +71,10 @@ a:visited { color:#828282; text-decoration:none; }
 .pagetop a:visited { color:#000000;}
 .topsel a:link, .topsel a:visited { color:#ffffff; }
 
-.subtext a:link, .subtext a:visited { color:#828282; }
+.subtext a:link, .subtext a:visited { color:#424242; }
 .subtext a:hover { text-decoration:underline; }
 
-.comhead a:link, .subtext a:visited { color:#828282; }
+.comhead a:link, .subtext a:visited { color:#424242; }
 .comhead a:hover { text-decoration:underline; }
 
 .hnmore a:link, a:visited { color:#828282; }
