@@ -4,7 +4,7 @@ A daily game where you try to guess the top [Hacker News](https://news.ycombinat
 
 Play online: https://hnguessr.ggerganov.com
 
-![image](https://user-images.githubusercontent.com/1991296/159133914-c1dc3abd-42f0-4e94-88a2-01dcc13ea797.png)
+![Peek 2022-03-22 20-36](https://user-images.githubusercontent.com/1991296/159552341-1f8abf8d-8eb2-4eca-8cde-9bc8aa4787b9.gif)
 
 ## Details
 
