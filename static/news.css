@@ -200,3 +200,102 @@ and (max-width : 750px) {
 @media only screen and (min-width : 1260px) and (max-width : 1349px) {
   .comment { max-width: 1130px; overflow: hidden }
 }
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 0px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: hidden; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    /*bottom: 100px;*/
+}
+
+/* Modal Content */
+.modal-content {
+    max-width: 800px;
+    min-width: 350px;
+    max-height: 75%;
+    overflow: auto; /* Enable scroll if needed */
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatefadein;
+    -webkit-animation-duration: 0.7s;
+    animation-name: animatefadein;
+    animation-duration: 0.7s
+}
+
+/* Add Animation */
+@-webkit-keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+@keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+@-webkit-keyframes animatefadein {
+    from {opacity:0}
+    to {opacity:1}
+}
+
+@keyframes animatefadein {
+    from {opacity:0}
+    to {opacity:1}
+}
+
+/* The Close Button */
+.close {
+    color: gray;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-header {
+    padding: 2px 16px;
+    padding-top: 16px;
+    padding-bottom: 0px;
+    background-color: #ffffff;
+    color: #000000;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.modal-body {
+    color: #000000;
+    position: relative;
+    padding: 2px 16px;
+}
+
+.modal-body li {
+    margin: 10px 0;
+}
+
+.modal-footer {
+    padding: 2px 16px;
+    padding-top: 24px;
+    padding-bottom: 16px;
+    background-color: #ffffff;
+    color: #000000;
+}

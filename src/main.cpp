@@ -62,7 +62,7 @@ int main(int argc, char ** argv) {
     imguiWS.init(port, httpRoot,
                  {
                      "", "index.html", "admin.html",
-                     "news.css", "logo.gif", "s.gif",
+                     "news.css", "logo.gif", "s.gif", "demo.gif",
                      "favicon.ico", "favicon-16x16.png", "favicon-32x32.png",
                  });
 

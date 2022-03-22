@@ -203,6 +203,43 @@ bool State::generateIndex(const char * filename, int nStories) {
         <title>)" << kTitle << R"(</title>
     </head>
     <body style="display: none">
+        <!-- Help modal -->
+        <div id="modalHelp" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                </div>
+                <div class="modal-body">
+                    <p>
+                        <img src="/demo.gif" alt="Demo" style="width: 100%">
+                    </p>
+                    <p>
+                        Can you guess the missing words from yesterday's top HN stories?
+                    </p>
+                    <p>
+                        <ul>
+                            <li>
+                                Enter your answers in the boxes
+                            </li>
+                            <li>
+                                Press enter to verify your answers
+                            </li>
+                            <li>
+                                Correct answers are highlighted in green
+                            </li>
+                        </ul>
+                    </p>
+                    <p>
+                        Come back tomorrow for another round!
+                    </p>
+                    <center>
+                        <button id="modalHelpCloseButton" class="button" onClick="closeModals();">Got it!</button>
+                    </center>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+
         <center>
             <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
                 <tr>
@@ -644,7 +681,22 @@ bool State::generateIndex(const char * filename, int nStories) {
                 localStorage.setItem(curDay, JSON.stringify(inputs));
             }
 
+            var modalHelp = document.getElementById("modalHelp");
+
+            function closeModals(event) {
+                if (event == undefined || event.target == modalHelp) {
+                    modalHelp.style.display = "none";
+                }
+            }
+
             function init() {
+                window.addEventListener('touchend', closeModals, true);
+                window.addEventListener('mouseup',  closeModals, true);
+
+                if (localStorage.getItem("n") == null) {
+                    setTimeout(showHelp, 1000);
+                }
+
                 localStorage.setItem("n", nPlay);
 
                 // delete all elements with id "container-story-k" for k >= nPlay
@@ -740,13 +792,7 @@ bool State::generateIndex(const char * filename, int nStories) {
             }
 
             function showHelp() {
-                alert('Can you guess the missing words from yesterday\'s top HN stories?\n\n' +
-                      '- Enter your answers in the boxes below\n' +
-                      '- Press enter to verify your answers\n' +
-                      '- Correct answers are highlighted in green\n' +
-                      '- Wrong answers are highlighted in red\n' +
-                      '- You are free to try as many times as you like\n\n' +
-                      'Come back tomorrow for another round!');
+                modalHelp.style.display = "flex";
             }
 
             window.addEventListener('load', init);
