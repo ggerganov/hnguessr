@@ -390,7 +390,7 @@ bool State::generateIndex(const char * filename, int nStories) {
         </center>
 
         <script>
-            var nPlay = findGetParameter("n") || localStorage.getItem("n") || 10;
+            var nPlay = findGetParameter("n") || localStorage.getItem("n") || 5;
 
             var nStories = )" << nStories << R"(;
             var curDay = )" << curDay << R"(;
